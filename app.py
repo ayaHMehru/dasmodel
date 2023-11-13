@@ -6,6 +6,8 @@ import torch.nn as nn
 from torchvision import transforms as T
 import torchvision
 import torch.nn.functional as F
+pip uninstall torch
+pip install torch
 
 from PIL import Image
 import cv2
