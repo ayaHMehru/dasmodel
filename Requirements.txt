@@ -1,0 +1,14 @@
+numpy
+pandas
+matplotlib
+scikit-learn
+torch
+torchvision
+Pillow
+opencv-python
+albumentations
+tqdm
+segmentation-models-pytorch
+torchsummary
+gradio
+scikit-image
