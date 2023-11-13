@@ -20,7 +20,6 @@ import time
 import os
 from tqdm.notebook import tqdm
 
-!pip install -q torchsummary
 
 from torchsummary import summary
 import segmentation_models_pytorch as smp
