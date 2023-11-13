@@ -28,8 +28,7 @@ import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 # prototype things
-!pip install pillow scikit-image
-!pip install gradio
+
 import gradio as gr
 from skimage.metrics import structural_similarity as ssim
 
