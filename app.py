@@ -7,7 +7,6 @@ from torchvision import transforms as T
 import torchvision
 import torch.nn.functional as F
 
-pip install torch
 
 from PIL import Image
 import cv2
@@ -26,7 +25,7 @@ os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 # prototype things
 
-import gradio as gr
+
 from skimage.metrics import structural_similarity as ssim
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -521,131 +520,3 @@ print('Test Set mIoU', np.mean(mob_miou))
 
 print('Test Set Pixel Accuracy', np.mean(mob_acc))
 
-"""# Prototype"""
-
-test_set[2][0]
-
-def calculate_ssim(image1, image2):
-  # Resize images to the same dimensions
-    width, height = min(image1.size, image2.size)
-    image1_resized = image1.resize((width, height))
-    image2_resized = image2.resize((width, height))
-
-    # Convert images to NumPy arrays
-    array1 = np.array(image1_resized.convert('L'))
-    array2 = np.array(image2_resized.convert('L'))
-
-    # Calculate SSIM
-    similarity_index, _ = ssim(array1, array2, full=True)
-    return similarity_index
-
-def show(img_in):
-  # Setup the plot
-  # Plot for Data Loss
-  plt.figure()
-  plt.plot(history['val_loss'], label='val', marker='o')
-  plt.plot( history['train_loss'], label='train', marker='o')
-  plt.title('Loss per epoch'); plt.ylabel('loss');
-  plt.xlabel('epoch')
-  plt.legend(), plt.grid()
-  loss_fig = plt.gcf()
-
-  # Plot for Data mIoU
-  plt.figure()
-  plt.plot(history['train_miou'], label='train_mIoU', marker='*')
-  plt.plot(history['val_miou'], label='val_mIoU',  marker='*')
-  plt.title('Score per epoch'); plt.ylabel('mean IoU')
-  plt.xlabel('epoch')
-  plt.legend(), plt.grid()
-  miou_fig = plt.gcf()
-
-  # Plot for Data Accuracy
-  plt.figure()
-  plt.plot(history['train_acc'], label='train_accuracy', marker='*')
-  plt.plot(history['val_acc'], label='val_accuracy',  marker='*')
-  plt.title('Accuracy per epoch'); plt.ylabel('Accuracy')
-  plt.xlabel('epoch')
-  plt.legend(), plt.grid()
-  acc_fig = plt.gcf()
-
-  for n in range(len(test_set)):
-    # Calculate SSIM
-    ssim_index = calculate_ssim(img_in, test_set[n][0])
-
-    # Set a threshold based on your requirements
-    threshold = 0.80
-
-    if ssim_index > threshold:
-        print("The images are visually similar.")
-        similar_img = n
-        break
-    else:
-        print("The images are different.")
-
-  image3, mask3 = test_set[similar_img]
-  pred_mask3, score3 = predict_image_mask_miou(model, image3, mask3)
-
-  fig_ax1, ax1 = plt.subplots(1, 1, figsize=(8, 4))
-  ax1.imshow(image3)
-  ax1.set_title('Picture')
-
-  fig_ax2, ax2 = plt.subplots(1, 1, figsize=(8, 4))
-  ax2.imshow(mask3)
-  ax2.set_title('Ground truth')
-  ax2.set_axis_off()
-
-  fig_ax3, ax3 = plt.subplots(1, 1, figsize=(8, 4))
-  ax3.imshow(pred_mask3)
-  ax3.set_title('UNet-MobileNet | mIoU {:.3f}'.format(score3))
-  ax3.set_axis_off()
-
-  return loss_fig, miou_fig, acc_fig, fig_ax1, fig_ax2, fig_ax3,  np.mean(mob_miou),  np.mean(mob_acc)
-
-
-
-with gr.Blocks() as app:
-  gr.Markdown(
-    """
-    # Hasil
-    Start typing below to see the output.
-    """)
-  with gr.Row():
-    with gr.Column():
-      plt_loss = gr.Plot(label="Train Loss")
-    with gr.Column():
-      plt_miou = gr.Plot(label="Train mIoU")
-    with gr.Column():
-      plt_acc = gr.Plot(label="Train Accuracy")
-  with gr.Row():
-    with gr.Column():
-      img_input = gr.Image(type='pil')
-  with gr.Row():
-    with gr.Column():
-      btn_run = gr.Button("Submit")
-
-  examples = gr.Examples(examples=[
-      IMAGE_PATH+'001 (3).jpg',
-      IMAGE_PATH+'001 (4).jpg'
-  ], inputs=img_input)
-
-  gr.Markdown(
-    """
-    # Penerapan Segementasi Semantik
-    Start typing below to see the output.
-    """)
-  with gr.Row():
-    with gr.Column(scale=1):
-      img_out1 = gr.Plot(label='Picture')
-    with gr.Column(scale=1):
-      img_out2 = gr.Plot(label='Ground Truth')
-    with gr.Column(scale=1):
-      img_out3 = gr.Plot(label = 'UNet-MobileNet')
-  with gr.Row():
-    with gr.Column():
-      text_out1 = gr.Textbox(label="Test Set mIoU")
-    with gr.Column():
-      text_out2 = gr.Textbox(label="Test Set Pixel Accuracy")
-
-  btn_run.click(fn=show, inputs=[img_input] , outputs=[plt_loss, plt_miou, plt_acc, img_out1, img_out2, img_out3, text_out1, text_out2])
-
-app.launch(share=True)
